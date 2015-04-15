@@ -13,11 +13,37 @@ function init(){
   tasks = root.child('tasks');
   user.on('value', userChanged);
   tasks.on('child_added', taskAdded);
+  tasks.on('child_removed', taskRemoved);
+  tasks.on('child_changed', taskChanged);
   $('#create-task').click(createTask);
   $('#todos').on('click', '.delete', deleteTask);
+  $('#todos').on('change', 'input[type="checkbox"]', toggleComplete);
+}
+
+function taskChanged(snapshot){
+  var key = snapshot.key();
+  var task = snapshot.val();
+  var $tr = $('tr[data-key="' + key + '"]');
+  var checked = task.isComplete ? 'checked' : '';
+  $tr.removeClass().addClass(checked);
+  $tr.find('input[type=checkbox]').attr('checked', !!checked);
+}
+
+function toggleComplete(){
+  var key = $(this).closest('tr').data('key');
+  var checked = !!$(this).attr('checked');
+  tasks.child(key).update({isComplete: !checked});
+}
+
+function taskRemoved(snapshot){
+  var key = snapshot.key();
+  $('tr[data-key="' + key + '"]').remove();
 }
 
 function deleteTask(){
+  var key = $(this).closest('tr').data('key');
+  var task = tasks.child(key);
+  task.remove();
 }
 
 function taskAdded(snapshot){
@@ -25,7 +51,7 @@ function taskAdded(snapshot){
   var key = snapshot.key();
 
   var checked = task.isComplete ? 'checked' : '';
-  var tr = '<tr data-key="'+key+'"><td><button class="delete">&times;</button></td><td><input type="checkbox" ' + checked + '></td><td>' + task.title + '</td><td>' + moment(task.dueDate).format('YYYY-MM-DD') + '</td><td>' + task.priority + '</td><td>' + moment(task.createdAt).format('YYYY-MM-DD') + '</td></tr>';
+  var tr = '<tr class="' + checked + '" data-key="'+key+'"><td><button class="delete">&times;</button></td><td><input type="checkbox" ' + checked + '></td><td>' + task.title + '</td><td>' + moment(task.dueDate).format('YYYY-MM-DD') + '</td><td>' + task.priority + '</td><td>' + moment(task.createdAt).format('YYYY-MM-DD') + '</td></tr>';
   $('#todos > tbody').append(tr);
 }
 
