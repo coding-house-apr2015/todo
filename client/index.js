@@ -14,11 +14,18 @@ function init(){
   user.on('value', userChanged);
   tasks.on('child_added', taskAdded);
   $('#create-task').click(createTask);
+  $('#todos').on('click', '.delete', deleteTask);
+}
+
+function deleteTask(){
 }
 
 function taskAdded(snapshot){
   var task = snapshot.val();
-  var tr = '<tr><td>x</td><td><input type="checkbox" checked></td><td>' + task.title + '</td><td>' + moment(task.dueDate).format('YYYY-MM-DD') + '</td><td>' + task.priority + '</td><td>' + moment(task.createdAt).format('YYYY-MM-DD') + '</td></tr>';
+  var key = snapshot.key();
+
+  var checked = task.isComplete ? 'checked' : '';
+  var tr = '<tr data-key="'+key+'"><td><button class="delete">&times;</button></td><td><input type="checkbox" ' + checked + '></td><td>' + task.title + '</td><td>' + moment(task.dueDate).format('YYYY-MM-DD') + '</td><td>' + task.priority + '</td><td>' + moment(task.createdAt).format('YYYY-MM-DD') + '</td></tr>';
   $('#todos > tbody').append(tr);
 }
 
